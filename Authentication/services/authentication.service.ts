@@ -1,16 +1,17 @@
-import { config } from '@Config/config';
-import { User } from '@Entities';
+import {config} from '@Config/config';
+import {User} from '@Entities';
 import connectionInstance from '@Entities/Connection';
-import type { IAuthentication } from '@Interfaces';
-import { UserRepository } from '@Repositories';
-import { Throw400, Throw401 } from '@Repositories/ErrorHelpers';
+import type {IAuthentication} from '@Interfaces';
+import {UserRepository} from '@Repositories';
+import {Throw400, Throw401} from '@Repositories/ErrorHelpers';
 import amqp from 'amqplib';
-import { compare, hashSync } from 'bcrypt';
+import {compare, hashSync} from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import type { Context } from 'moleculer';
-import { Service as MoleculerService } from 'moleculer';
-import { Action, Method, Service } from 'moleculer-decorators';
-import { getConnection } from 'typeorm';
+import type {Context} from 'moleculer';
+import {Service as MoleculerService} from 'moleculer';
+import {Action, Method, Service} from 'moleculer-decorators';
+import {getConnection} from 'typeorm';
+import {UserType} from "@Infrastructure/Enum/User";
 
 @Service({
 	name: 'authentication',
@@ -129,6 +130,7 @@ export class AuthenticationService extends MoleculerService {
 		user.email = email;
 		user.password = hashSync(password, config.jwt.jwtSaltRounds);
 		user.isActive = false;
+		user.type = UserType.USER
 
 		this.generateActiveAccountJWT(user);
 		return await user.save();
