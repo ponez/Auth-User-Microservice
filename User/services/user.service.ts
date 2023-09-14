@@ -105,7 +105,7 @@ export class UserService extends MoleculerService {
 
 					// Reject the message to move it to a dead letter queue (DLQ)
 					// or configure your RabbitMQ setup to handle retries
-					this.channel.reject(message, false); // Set the second argument to true for requeue
+					await this.channel.reject(message, false); // Set the second argument to true for requeue
 				}
 			});
 		} catch (e) {
