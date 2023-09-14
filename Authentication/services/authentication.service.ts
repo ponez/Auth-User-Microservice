@@ -37,8 +37,8 @@ export class AuthenticationService extends MoleculerService {
 
 	@Action({
 		params: {
-			email: { type: 'email', label: 'Email Address', max: 50 },
-			username: { type: 'string', min: 2, max: 20 },
+			email: {type: 'email', label: 'Email Address', max: 50},
+			username: {type: 'string', min: 2, max: 20},
 			password: {
 				type: 'string',
 				min: 6,
@@ -53,7 +53,7 @@ export class AuthenticationService extends MoleculerService {
 
 	@Action({
 		params: {
-			email: { type: 'email', label: 'Email Address', max: 50 },
+			email: {type: 'email', label: 'Email Address', max: 50},
 			password: {
 				type: 'string',
 				min: 6,
@@ -68,7 +68,7 @@ export class AuthenticationService extends MoleculerService {
 
 	@Action({
 		params: {
-			email: { type: 'email', label: 'Email Address', max: 50 },
+			email: {type: 'email', label: 'Email Address', max: 50},
 			password: {
 				type: 'string',
 				min: 6,
@@ -83,8 +83,8 @@ export class AuthenticationService extends MoleculerService {
 
 	@Action({
 		params: {
-			email: { type: 'email', label: 'Email Address', max: 50 },
-			username: { type: 'string', min: 2, max: 20 },
+			email: {type: 'email', label: 'Email Address', max: 50},
+			username: {type: 'string', min: 2, max: 20},
 			password: {
 				type: 'string',
 				min: 6,
@@ -120,7 +120,7 @@ export class AuthenticationService extends MoleculerService {
 
 	@Method
 	public async SignUpMethod(ctx: Context<IAuthentication.SignupDto>) {
-		const { email, username, password } = ctx.params;
+		const {email, username, password} = ctx.params;
 		let user = await UserRepository.findOneWithEmailForSignUp(email);
 		if (user) {
 			Throw400(null, 'already exist');
@@ -131,30 +131,30 @@ export class AuthenticationService extends MoleculerService {
 		user.password = hashSync(password, config.jwt.jwtSaltRounds);
 		user.isActive = false;
 		user.type = UserType.USER
+		const savedUser = await user.save();
 
 		this.generateActiveAccountJWT(user);
-		return await user.save();
+		return savedUser
 	}
 
 	@Method
 	public async activateAccountMethod(ctx: Context) {
 		const token = ctx.meta['authToken'];
 
-		const { id } = await jwt.verify(token, config.jwt.jwtActiveAccountSecret);
+		const {id} = await jwt.verify(token, config.jwt.jwtActiveAccountSecret);
 		const user = await UserRepository.findOneWithId(id);
-
 		user.isActive = true;
 		await user.save();
 		const queue = 'create_user_queue';
 
 		await this.channel.assertQueue(queue);
 		await this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(user)));
-		return { message: 'done' };
+		return {message: 'done'};
 	}
 
 	@Method
 	public async LoginMethod(ctx: Context<IAuthentication.LoginDto>) {
-		const { email, password } = ctx.params;
+		const {email, password} = ctx.params;
 
 		const user = await UserRepository.findOneWithEmail(email);
 
@@ -168,7 +168,7 @@ export class AuthenticationService extends MoleculerService {
 			Throw401(undefined, 'User is not active yet');
 		}
 
-		return { token: this.generateJWT(user) };
+		return {token: this.generateJWT(user)};
 	}
 
 	@Method
@@ -190,7 +190,7 @@ export class AuthenticationService extends MoleculerService {
 
 	@Method
 	async resendActivationTokenMethod(ctx) {
-		const { email, password } = ctx.params;
+		const {email, password} = ctx.params;
 
 		const user = await UserRepository.findOneWithEmail(email);
 
@@ -204,7 +204,7 @@ export class AuthenticationService extends MoleculerService {
 		}
 
 		await this.generateActiveAccountJWT(user);
-		return { message: 'done' };
+		return {message: 'done'};
 	}
 
 	@Method
@@ -212,7 +212,6 @@ export class AuthenticationService extends MoleculerService {
 		const today = new Date();
 		const exp = new Date(today);
 		exp.setHours(exp.getHours() + 1); // Adds 1 hours
-
 		const token = jwt.sign(
 			{
 				id: user.id,
