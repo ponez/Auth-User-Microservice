@@ -33,6 +33,7 @@ export class AuthenticationService extends MoleculerService {
 		await connectionInstance();
 		this.connection = await amqp.connect('amqp://test:password@localhost:5672');
 		this.channel = await this.connection.createChannel();
+		await this.seedAdminUser()
 	}
 
 	@Action({
@@ -55,10 +56,7 @@ export class AuthenticationService extends MoleculerService {
 		params: {
 			email: {type: 'email', label: 'Email Address', max: 50},
 			password: {
-				type: 'string',
-				min: 6,
-				max: 22,
-				pattern: /((?=.*\d)|(?=.*\W+))(?![.\n]).*$/,
+				type: 'string'
 			},
 		},
 	})
@@ -70,10 +68,7 @@ export class AuthenticationService extends MoleculerService {
 		params: {
 			email: {type: 'email', label: 'Email Address', max: 50},
 			password: {
-				type: 'string',
-				min: 6,
-				max: 22,
-				pattern: /((?=.*\d)|(?=.*\W+))(?![.\n]).*$/,
+				type: 'string'
 			},
 		},
 	})
@@ -84,12 +79,8 @@ export class AuthenticationService extends MoleculerService {
 	@Action({
 		params: {
 			email: {type: 'email', label: 'Email Address', max: 50},
-			username: {type: 'string', min: 2, max: 20},
 			password: {
-				type: 'string',
-				min: 6,
-				max: 22,
-				pattern: /((?=.*\d)|(?=.*\W+))(?![.\n]).*$/,
+				type: 'string'
 			},
 		},
 	})
@@ -224,6 +215,32 @@ export class AuthenticationService extends MoleculerService {
 
 		// we could send this to an email using email transporter and emitting this as a message
 		console.log(token);
+	}
+
+	async seedAdminUser() {
+		try {
+			const existingAdmin = await UserRepository.findOneWithEmailForSignUp('admin@example.com');
+
+			if (existingAdmin) return;
+			const admin = new User()
+
+			admin.username = 'admin';
+			admin.email = 'admin@example.com';
+			admin.password = hashSync('adminPassword', 10)
+			admin.type = UserType.ADMIN;
+			admin.isActive = true;
+
+			// Create a new User entity with the admin user data
+
+
+			// Save the admin user to the database
+			await admin.save();
+
+			console.log('Admin user seeded successfully.');
+
+		} catch (error) {
+			console.error('Error seeding admin user:', error);
+		}
 	}
 
 	public async stopped() {
