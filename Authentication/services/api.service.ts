@@ -1,5 +1,5 @@
-import { Throw401 } from '@Repositories/ErrorHelpers';
-import { ServiceSchema } from 'moleculer';
+import {Throw401} from '@Repositories/ErrorHelpers';
+import {ServiceSchema} from 'moleculer';
 import ApiGateway from 'moleculer-web';
 
 const ApiService: ServiceSchema = {
@@ -15,6 +15,8 @@ const ApiService: ServiceSchema = {
 				aliases: {
 					'POST /signup': 'authentication.signup',
 					'POST /resend-activation-token': 'authentication.resendActivationToken',
+					'POST /login': 'authentication.login',
+
 				},
 				cors: {
 					credentials: true,
@@ -26,7 +28,6 @@ const ApiService: ServiceSchema = {
 			},
 			{
 				aliases: {
-					'POST /auth/login': 'authentication.login',
 					'POST /auth/activate-account': 'authentication.activateAccount',
 				},
 				cors: {
